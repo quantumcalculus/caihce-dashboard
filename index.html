@@ -898,6 +898,114 @@ function pmStacked(data) {
 }
 
 
+
+function mCard(title, body) {
+  return '<div style="background:#f0f5ff;border:2px solid #b8c9e8;border-radius:10px;padding:14px 18px;margin-bottom:16px">' +
+    '<div style="font-size:12px;font-weight:700;color:#5a7aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">' + currentModel + ' — ' + title + '</div>' + body + '</div>';
+}
+
+function mScoreBadges(scores) {
+  if (!scores) return '';
+  return ['D1','D2','D3'].map(function(d) {
+    var v = scores[d];
+    var hl = d === regDim;
+    return '<span style="display:inline-block;padding:6px 14px;border-radius:6px;margin-right:6px;font-weight:700;font-size:'+(hl?'18':'13')+'px;background:'+scoreColor(v)+';color:'+textColorForBg(v)+';'+(hl?'box-shadow:0 0 0 2px #5a7aaa;':'opacity:0.7;')+'">'+d+': '+v.toFixed(2)+'</span>';
+  }).join('');
+}
+
+function mBarRow(label, val, max, tag) {
+  max = max || 5;
+  return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
+    '<span style="width:140px;font-size:12px;font-weight:600;text-align:right">'+label+'</span>' +
+    '<div style="flex:1;height:22px;background:#e8e4dc;border-radius:5px;overflow:hidden">' +
+    '<div style="width:'+Math.max(2,val/max*100)+'%;height:100%;background:'+scoreColor(val)+';display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:700;color:'+textColorForBg(val)+'">'+val.toFixed(2)+(tag||'')+'</div></div></div>';
+}
+
+function mQ1() {
+  var m = currentModel, d = regDim;
+  if (!PM.q1[m]) return '';
+  var pairs = ['safety_vs_helpfulness','ethics_vs_helpfulness','safety_vs_compliance','ethics_vs_compliance','safety_vs_ethics','compliance_vs_helpfulness'];
+  var best = pairs[0], worst = pairs[0];
+  pairs.forEach(function(p){if(PM.q1[m][p][d]>PM.q1[m][best][d])best=p;if(PM.q1[m][p][d]<PM.q1[m][worst][d])worst=p;});
+  var body = pairs.map(function(p){
+    var v=PM.q1[m][p][d]; var tag=p===best?' ✓':p===worst?' ✗':'';
+    return mBarRow(PAIR_LABELS[p]||p, v, 5, tag);
+  }).join('');
+  return mCard('Conflict Pair Scores ('+d+')', body +
+    '<div style="margin-top:8px;font-size:12px;color:#5a7aaa"><strong>Strongest:</strong> '+(PAIR_LABELS[best]||best)+' · <strong>Weakest:</strong> '+(PAIR_LABELS[worst]||worst)+'</div>');
+}
+
+function mQ2() {
+  var m = currentModel, d = regDim;
+  if (!PM.q2[m]) return '';
+  var judges = Object.keys(PM.q2[m]).sort(function(a,b){return PM.q2[m][b][d]-PM.q2[m][a][d];});
+  var body = judges.map(function(j){return mBarRow(j, PM.q2[m][j][d], 5);}).join('');
+  return mCard('How Each Judge Scored This Model ('+d+')', body +
+    '<div style="margin-top:8px;font-size:12px;color:#5a7aaa"><strong>Most lenient:</strong> '+judges[0]+' · <strong>Harshest:</strong> '+judges[judges.length-1]+'</div>');
+}
+
+function mQ3() {
+  var m = currentModel;
+  if (!PM.q3[m]) return mCard('Same-Family Bias', '<div style="color:var(--text2);font-size:13px">No same-family judge for this model.</div>');
+  var d = PM.q3[m];
+  var body = '<div style="font-size:13px;margin-bottom:8px">Family judge: <strong>'+d.family_judge+'</strong></div>' +
+    '<div style="display:flex;gap:12px;flex-wrap:wrap">' +
+    ['D1','D2','D3'].map(function(dim){
+      var v = d.delta[dim];
+      var col = v > 0 ? '#d4735a' : '#5ab88a';
+      return '<div style="text-align:center;padding:8px 16px;background:'+(dim===regDim?'#fff':'#f8f5ff')+';border-radius:8px;'+(dim===regDim?'box-shadow:0 0 0 2px #5a7aaa;':'')+'"><div style="font-size:11px;color:var(--text2)">'+dim+'</div><div style="font-size:20px;font-weight:700;color:'+col+'">'+(v>0?'+':'')+v.toFixed(2)+'</div></div>';
+    }).join('') + '</div>';
+  return mCard('Same-Family Bias', body);
+}
+
+function mQ4() {
+  var m = currentModel;
+  if (!PM.q4[m]) return '';
+  var r = PM.q4[m];
+  return mCard('Size: ' + r.size.toUpperCase(), mScoreBadges(r));
+}
+
+function mQ5() {
+  var m = currentModel;
+  if (!PM.q5[m]) return '';
+  var r = PM.q5[m];
+  return mCard('Family: ' + r.family, mScoreBadges(r));
+}
+
+function mQ6() {
+  var m = currentModel;
+  if (!PM.q6[m]) return '';
+  var r = PM.q6[m];
+  var cats = [
+    {k:'Aligned Success',c:'#5ab88a'},{k:'Other',c:'#d4a84a'},{k:'Aligned Failure',c:'#d4735a'},
+    {k:'False Confidence',c:'#9a7a6a'},{k:'Eloquent Failure',c:'#888'}
+  ];
+  var body = '<div style="display:flex;height:30px;border-radius:6px;overflow:hidden;margin-bottom:8px">' +
+    cats.map(function(cat){
+      var pct = r[cat.k]||0;
+      if (pct<0.3) return '';
+      return '<div style="width:'+pct+'%;background:'+cat.c+';display:flex;align-items:center;justify-content:center;font-size:'+(pct>5?'11':'0')+'px;font-weight:700;color:#fff">'+(pct>=4?pct.toFixed(1)+'%':'')+'</div>';
+    }).join('') + '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    cats.map(function(cat){
+      return '<span style="font-size:11px;display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:'+cat.c+';display:inline-block"></span>'+cat.k+': '+r[cat.k].toFixed(1)+'%</span>';
+    }).join('') + '</div>';
+  return mCard('D1×D2 Alignment', body);
+}
+
+function mQ7() {
+  var m = currentModel, d = regDim;
+  if (!PM.q7[m]) return '';
+  var body = ['1','2','3'].map(function(g){
+    var v = PM.q7[m][g][d];
+    return mBarRow(g+'-gap', v, 5);
+  }).join('');
+  var g1=PM.q7[m]['1'][d], g2=PM.q7[m]['2'][d], g3=PM.q7[m]['3'][d];
+  var delta = '<div style="margin-top:8px;font-size:12px;color:#5a7aaa">1→2: '+(g2-g1>0?'+':'')+(g2-g1).toFixed(2)+' · 2→3: '+(g3-g2>0?'+':'')+(g3-g2).toFixed(2)+'</div>';
+  return mCard('Tier Distance ('+d+')', body + delta);
+}
+
+
 // ===================== REGRESSION VIEW =====================
 function dimTabs() {
   return `<div class="dim-tabs">
@@ -955,7 +1063,9 @@ function dbar(items, maxAbs=1.5, refLabel='baseline') {
 }
 
 function renderRegressionView() {
-  return dimTabs() + renderRegQ1() + renderRegQ2() + renderRegQ3() + renderRegQ4() + renderRegQ5() + renderRegQ6() + renderRegQ7() + renderRegQ8() + renderRegPressure() + renderRegRobustness();
+  const mTabs = '<div class="model-tabs" style="margin-bottom:16px">' +
+    MODEL_ORDER.map(m => '<div class="model-tab '+(m===currentModel?'active':'')+'" onclick="setModel(this.dataset.m)" data-m="'+m+'">'+m+'</div>').join('') + '</div>';
+  return mTabs + dimTabs() + renderRegQ1() + renderRegQ2() + renderRegQ3() + renderRegQ4() + renderRegQ5() + renderRegQ6() + renderRegQ7() + renderRegQ8() + renderRegPressure() + renderRegRobustness();
 }
 
 // ---- Q1 ----
@@ -976,6 +1086,7 @@ function renderRegQ1() {
       'Each conflict pair gets its own variable in the regression. The reference (baseline) is <strong>compliance vs helpfulness</strong>, the hardest pair. All other pairs are measured as "how much better than compliance vs helpfulness?"',
       {cls:'m-highlight', html:`<div class="m-label">What the numbers mean</div>A coefficient of +0.92 for "safety vs helpfulness" means: <em>holding everything else equal</em>, models score 0.92 points higher on this pair than on compliance vs helpfulness. All coefficients are positive because comp vs help is the hardest.`}
     ])}
+    ${mQ1()}
     <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Score advantage over compliance vs helpfulness (${dim})</div>
     ${dbar(pairs.map(([p,d]) => ({label: PAIR_LABELS[p]||p, val:d.coef, p:d.p})), 1.2, 'comp vs help')}
     <div style="margin-top:20px;font-size:14px;font-weight:600;margin-bottom:8px;">Average scores by conflict pair (all models, all judges)</div>
@@ -1005,6 +1116,7 @@ function renderRegQ2() {
       'The reference judge is <strong>Opus 4.6</strong>, chosen because it\u0027s the closest to human scoring (see Q8). All other judges are measured relative to Opus 4.6.',
       {cls:'m-highlight', html:`<div class="m-label">What the numbers mean</div>A coefficient of +1.29 for Gemini FL on D2 means: on the same response, Gemini FL gives scores 1.29 points higher than Opus 4.6 on reasoning quality. A negative number means the judge is harsher.`}
     ])}
+    ${mQ2()}
     <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Judge scoring relative to Opus 4.6 (${dim})</div>
     ${dbar(items.map(([j,d]) => ({label:j, val:d.coef, p:d.p})), dim==='D2'?1.5:dim==='D3'?0.8:1.4, 'Opus 4.6')}
     ${findingBox([
@@ -1037,6 +1149,7 @@ function renderRegQ3() {
       'This variable is included alongside all other controls (judge identity, pressure, tier distance), so the coefficient captures <em>pure family bias</em> — the extra score bump that only appears when a judge evaluates its own family.',
       {cls:'m-highlight', html:`<div class="m-label">What the numbers mean</div>The coefficient shows how many extra points a same-family judge gives, on average, compared to a cross-family judge scoring the identical response under identical conditions.`}
     ])}
+    ${mQ3()}
     <div class="stat-row">
       ${['D1','D2','D3'].map(d => `<div class="stat-card" style="border-left:4px solid #d4735a">
         <div class="label">${d} — ${d==='D1'?'Priority':d==='D2'?'Reasoning':'Robustness'}</div>
@@ -1079,6 +1192,7 @@ function renderRegQ7() {
       'Instead of assuming the relationship is linear (each extra gap = same improvement), we used <strong>separate variables for 2-gap and 3-gap</strong>, with 1-gap as the baseline. This lets us detect if there\u0027s a sudden jump (threshold) or a smooth progression.',
       {cls:'m-highlight', html:`<div class="m-label">How to read the pattern</div>If the 3-gap coefficient is roughly 2× the 2-gap coefficient → the improvement is <strong>linear</strong> (steady gain per gap).<br>If 3-gap ≈ 2-gap → there\u0027s a <strong>threshold</strong> (big jump to 2-gap, then plateau).<br>If 3-gap > 2× the 2-gap → the effect is <strong>accelerating</strong> (gets much easier at the widest gap).`}
     ])}
+    ${mQ7()}
     <div class="stat-row">
       <div class="stat-card"><div class="label">1-gap (baseline)</div><div class="value" style="font-size:22px">0.00</div><div class="sub">Adjacent tiers (e.g., Ethics vs Compliance)</div></div>
       <div class="stat-card" style="border-left:4px solid ${r.distance_2.p<0.05?'#5ab88a':'#ccc'}">
@@ -1117,6 +1231,7 @@ function renderRegQ4() {
       'We grouped the 10 models into three size tiers: <strong>Big</strong> (Opus 4/4.5/4.6, GPT 5.4 Pro, Gemini 3.1 Pro), <strong>Medium</strong> (Sonnet 4.5/4.6), and <strong>Small</strong> (Haiku 4.5, GPT-5 Nano, Gemini FL).',
       'Each size tier gets a variable in the regression. Small is the reference (baseline). The coefficient shows how much better (or worse) big/medium models score compared to small models, after controlling for everything else.',
     ])}
+    ${mQ4()}
     <div class="stat-row">
       <div class="stat-card" style="border-left:4px solid ${r.big.p<0.05?'#5ab88a':'#ccc'}">
         <div class="label">Big vs Small</div>
@@ -1161,6 +1276,7 @@ function renderRegQ5() {
       'Each model family gets its own variable. The reference is <strong>Opus</strong> (the Anthropic flagship line). Positive coefficient = this family scores higher than Opus; negative = lower.',
       'This controls for judge effects, pressure, tier distance, and same-family bias — so the coefficient captures pure family-level performance differences.',
     ])}
+    ${mQ5()}
     <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Family performance relative to Opus (${dim})</div>
     ${dbar(items.map(([f,d]) => ({label:f, val:d.coef, p:d.p})), 1.3, 'Opus')}
     ${findingBox([
@@ -1194,6 +1310,7 @@ function renderRegQ6() {
       'We cross-tabulated D1 (did the model pick the right priority?) with D2 (did it reason correctly about why?). Four key patterns emerge:',
       {cls:'m-highlight', html:`<strong>Aligned Success</strong> (D1≥4, D2≥4): Right answer, good reasoning — the ideal outcome.<br><strong>Aligned Failure</strong> (D1≤2, D2≤2): Wrong answer, poor reasoning — total failure.<br><strong>False Confidence</strong> (D1≥4, D2≤2): Right answer but can\u0027t explain why — lucky or memorized.<br><strong>Eloquent Failure</strong> (D1≤2, D2≥4): Wrong answer but articulate reasoning — persuasively wrong.`}
     ])}
+    ${mQ6()}
     <div class="stat-row" style="flex-wrap:wrap">
       <div class="stat-card" style="border-left:4px solid #5ab88a;flex:2;min-width:160px"><div class="label">Aligned Success</div><div class="value" style="color:#5ab88a">${r.pct['Aligned Success']}%</div><div class="sub">${r.overall['Aligned Success'].toLocaleString()} responses</div></div>
       <div class="stat-card" style="border-left:4px solid #d4735a;flex:2;min-width:160px"><div class="label">Aligned Failure</div><div class="value" style="color:#d4735a">${r.pct['Aligned Failure']}%</div><div class="sub">${r.overall['Aligned Failure'].toLocaleString()} responses</div></div>
