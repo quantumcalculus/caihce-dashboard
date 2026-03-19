@@ -127,18 +127,26 @@ const PAIR_ORDER = ['safety_vs_ethics','safety_vs_compliance','safety_vs_helpful
 const TIER_ORDER = ['Safety','Ethics','Compliance','Helpfulness'];
 
 function scoreColor(v, min=0, max=5) {
-  if (v == null) return '#2a1540';
-  const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
-  // Inferno/viridis-inspired: dark purple(low) -> magenta -> orange -> yellow(high)
+  if (v == null) return '#eee';
+  // Concentrated range: most scores fall 3.0-5.0, so we stretch that range
+  // Map 0-5 onto 0-1, but then remap so 3.0-5.0 uses 70% of the color space
+  let t = Math.max(0, Math.min(1, (v - min) / (max - min)));
+  // Nonlinear remap: stretch the top range for granularity where it matters
+  if (t > 0.6) { t = 0.3 + (t - 0.6) / 0.4 * 0.7; }
+  else { t = t / 0.6 * 0.3; }
+  t = Math.max(0, Math.min(1, t));
+  // Dark red(worst) -> red -> orange -> yellow-green -> green -> deep green(best)
   const stops = [
-    [0.00,  15,  10,  45],  // near-black purple
-    [0.15,  60,  18,  90],  // dark purple
-    [0.30, 120,  28, 110],  // magenta-purple
-    [0.45, 170,  45,  90],  // hot pink
-    [0.60, 210,  80,  55],  // red-orange
-    [0.75, 235, 140,  35],  // orange
-    [0.90, 250, 200,  55],  // yellow-orange
-    [1.00, 252, 250, 120],  // bright yellow
+    [0.00, 110,  15,  10],  // dark maroon
+    [0.12, 160,  20,  15],  // dark red
+    [0.25, 200,  45,  25],  // red
+    [0.38, 220, 100,  30],  // red-orange
+    [0.50, 230, 160,  40],  // orange-yellow
+    [0.62, 200, 200,  50],  // yellow-green
+    [0.72, 130, 190,  50],  // lime
+    [0.82,  60, 165,  50],  // green
+    [0.92,  20, 130,  40],  // deep green
+    [1.00,   5, 100,  30],  // darkest green
   ];
   let i = 0;
   for (let k = 0; k < stops.length - 1; k++) {
@@ -154,9 +162,9 @@ function scoreColor(v, min=0, max=5) {
 }
 
 function textColorForBg(v) {
-  if (v == null) return '#aaa';
+  if (v == null) return '#666';
   const t = (v - 0) / 5;
-  return t > 0.7 ? '#222' : '#f0e8dc';
+  return (t < 0.45 || t > 0.88) ? '#fff' : '#1a1a1a';
 }
 
 // State
