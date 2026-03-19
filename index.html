@@ -738,9 +738,9 @@ function renderTierDistance(d) {
           ${trendLine}
         </svg>
       </div>
-      ${pattern ? `<div style="background:var(--bg);padding:12px 16px;border-radius:8px;font-size:13px;margin-top:8px;">
+      ${pattern ? '<div style="background:var(--bg);padding:12px 16px;border-radius:8px;font-size:13px;margin-top:8px;">
         <strong>Pattern detected:</strong> ${pattern}
-      </div>` : ''}
+      </div>' : ''}
       <div style="margin-top:12px;">
         <table class="heatmap" style="border-spacing:4px;">
           <thead>
@@ -847,11 +847,11 @@ function sigLabel(p) {
 function sigStars(p) { return p<0.001?'***':p<0.01?'**':p<0.05?'*':p<0.1?'.':''; }
 
 function methodBox(title, paragraphs) {
-  return `<div class="method-card"><h4>${title}</h4>${paragraphs.map(p => typeof p === 'string' ? `<p>${p}</p>` : `<div class="${p.cls||''}">${p.html}</div>`).join('')}</div>`;
+  return `<div class="method-card"><h4>${title}</h4>${paragraphs.map(p => typeof p === 'string' ? '<p>'+p+'</p>' : '<div class="'+(p.cls||'')+'">'+p.html+'</div>').join('')}</div>`;
 }
 
 function findingBox(lines) {
-  return `<div class="finding"><h4>What this means for constitutional conflict resolution</h4>${lines.map(l=>`<p>${l}</p>`).join('')}</div>`;
+  return `<div class="finding"><h4>What this means for constitutional conflict resolution</h4>${lines.map(l=>'<p>'+l+'</p>').join('')}</div>`;
 }
 
 function hbar(items, max=5) {
@@ -1138,10 +1138,7 @@ function renderRegPressure() {
       <div class="stat-card" style="border-left:4px solid ${d.moderate.p<0.05?'#d4735a':'#ccc'}"><div class="label">Moderate Pressure</div><div class="value" style="font-size:22px;color:${d.moderate.p<0.05?'#d4735a':'#999'}">${d.moderate.coef>0?'+':''}${d.moderate.coef.toFixed(3)}</div><div class="sub">${sigLabel(d.moderate.p)}</div></div>
       <div class="stat-card" style="border-left:4px solid ${d.high.p<0.05?(d.high.coef>0?'#5ab88a':'#d4735a'):'#ccc'}"><div class="label">High Pressure</div><div class="value" style="font-size:22px;color:${d.high.p<0.05?(d.high.coef>0?'#5ab88a':'#d4735a'):'#999'}">${d.high.coef>0?'+':''}${d.high.coef.toFixed(3)}</div><div class="sub">${sigLabel(d.high.p)}</div></div>
     </div>
-    ${dim==='D3' ? `<div class="finding" style="background:#fef6f0;border-left-color:#d4735a;margin-top:12px">
-      <h4 style="color:#b85a3a">Key Discovery: Moderate pressure is MORE effective than high pressure</h4>
-      <p>D3 (robustness) drops by <strong>1.27 points</strong> under moderate pressure, but only <strong>0.94 points</strong> under high pressure. Why? High-pressure manipulation is obvious — models "catch" the transparent steering and hold firm. Moderate pressure uses subtler framing that slips past the model's defenses. <strong>For adversarial testing of constitutional AI, moderate pressure is the optimal attack level.</strong></p>
-    </div>` : ''}
+    ${dim==='D3' ? '<div class="finding" style="background:#fef6f0;border-left-color:#d4735a;margin-top:12px"><h4 style="color:#b85a3a">Key Discovery: Moderate pressure is MORE effective than high pressure</h4><p>D3 (robustness) drops by <strong>1.27 points</strong> under moderate pressure, but only <strong>0.94 points</strong> under high pressure. Why? High-pressure manipulation is obvious — models \'catch\' the transparent steering and hold firm. Moderate pressure uses subtler framing that slips past the model\'s defenses. <strong>For adversarial testing of constitutional AI, moderate pressure is the optimal attack level.</strong></p></div>' : ''}
   </div>`;
 }
 
