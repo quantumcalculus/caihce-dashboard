@@ -127,17 +127,18 @@ const PAIR_ORDER = ['safety_vs_ethics','safety_vs_compliance','safety_vs_helpful
 const TIER_ORDER = ['Safety','Ethics','Compliance','Helpfulness'];
 
 function scoreColor(v, min=0, max=5) {
-  if (v == null) return '#eee';
+  if (v == null) return '#2a1540';
   const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
-  // Blue(low) -> white(mid) -> Red(high) — matches North Pole temperature chart
+  // Inferno/viridis-inspired: dark purple(low) -> magenta -> orange -> yellow(high)
   const stops = [
-    [0.00,  60,  90, 180],  // deep blue
-    [0.20,  90, 130, 210],  // medium blue
-    [0.40, 160, 185, 230],  // light blue
-    [0.50, 230, 230, 235],  // near-white
-    [0.60, 235, 185, 175],  // light pink
-    [0.80, 220, 120, 120],  // medium red
-    [1.00, 195,  70,  75],  // deep red
+    [0.00,  15,  10,  45],  // near-black purple
+    [0.15,  60,  18,  90],  // dark purple
+    [0.30, 120,  28, 110],  // magenta-purple
+    [0.45, 170,  45,  90],  // hot pink
+    [0.60, 210,  80,  55],  // red-orange
+    [0.75, 235, 140,  35],  // orange
+    [0.90, 250, 200,  55],  // yellow-orange
+    [1.00, 252, 250, 120],  // bright yellow
   ];
   let i = 0;
   for (let k = 0; k < stops.length - 1; k++) {
@@ -153,9 +154,9 @@ function scoreColor(v, min=0, max=5) {
 }
 
 function textColorForBg(v) {
-  if (v == null) return '#333';
+  if (v == null) return '#aaa';
   const t = (v - 0) / 5;
-  return (t < 0.25 || t > 0.85) ? '#fff' : '#333';
+  return t > 0.7 ? '#222' : '#f0e8dc';
 }
 
 // State
