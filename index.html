@@ -49,7 +49,7 @@
   /* Heatmap table */
   .heatmap-wrap { overflow-x:auto; }
   .heatmap { border-collapse:separate; border-spacing:4px; width:100%; }
-  .heatmap th { font-size:12px; font-weight:600; color:#c97b5a; padding:4px 8px; text-align:center; white-space:nowrap; }
+  .heatmap th { font-size:12px; font-weight:600; color:#666; padding:4px 8px; text-align:center; white-space:nowrap; }
   .heatmap td { padding:8px 10px; text-align:center; border-radius:6px; font-size:14px; font-weight:600; min-width:52px; }
   .heatmap .row-label { text-align:left; font-weight:600; font-size:14px; color:var(--text); background:transparent; min-width:160px; }
   .heatmap .tier-header { font-size:13px; font-weight:700; text-align:center; padding-bottom:2px; }
@@ -127,16 +127,17 @@ const PAIR_ORDER = ['safety_vs_ethics','safety_vs_compliance','safety_vs_helpful
 const TIER_ORDER = ['Safety','Ethics','Compliance','Helpfulness'];
 
 function scoreColor(v, min=0, max=5) {
-  if (v == null) return '#eae5dc';
+  if (v == null) return '#eee';
   const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
-  // Matches screenshot: red(low) -> salmon -> peach -> pale yellow -> light green -> green(high)
+  // Blue(low) -> white(mid) -> Red(high) — matches North Pole temperature chart
   const stops = [
-    [0.00, 220, 88, 82],   // red
-    [0.30, 232, 150, 120],  // salmon
-    [0.50, 240, 205, 150],  // warm yellow
-    [0.70, 200, 222, 160],  // pale green
-    [0.85, 140, 205, 140],  // medium green
-    [1.00, 100, 190, 120],  // green
+    [0.00,  60,  90, 180],  // deep blue
+    [0.20,  90, 130, 210],  // medium blue
+    [0.40, 160, 185, 230],  // light blue
+    [0.50, 230, 230, 235],  // near-white
+    [0.60, 235, 185, 175],  // light pink
+    [0.80, 220, 120, 120],  // medium red
+    [1.00, 195,  70,  75],  // deep red
   ];
   let i = 0;
   for (let k = 0; k < stops.length - 1; k++) {
@@ -152,7 +153,9 @@ function scoreColor(v, min=0, max=5) {
 }
 
 function textColorForBg(v) {
-  return (v != null && v < 1.5) ? '#fff' : '#3d3226';
+  if (v == null) return '#333';
+  const t = (v - 0) / 5;
+  return (t < 0.25 || t > 0.85) ? '#fff' : '#333';
 }
 
 // State
