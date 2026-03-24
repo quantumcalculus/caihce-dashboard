@@ -1238,9 +1238,11 @@ function renderConflictPairDifficulty() {
 function renderModelLeaderboard() {
   const pairs = ['safety_vs_helpfulness','ethics_vs_helpfulness','safety_vs_compliance','ethics_vs_compliance','safety_vs_ethics','compliance_vs_helpfulness'];
   const pairLabels = {'safety_vs_helpfulness':'Saf v Help','ethics_vs_helpfulness':'Eth v Help','safety_vs_compliance':'Saf v Comp','ethics_vs_compliance':'Eth v Comp','safety_vs_ethics':'Saf v Eth','compliance_vs_helpfulness':'Comp v Help'};
-  const families = {'Sonnet 4.6':'Sonnet','Sonnet 4.5':'Sonnet','Opus 4.6':'Opus','Opus 4.5':'Opus','Opus 4':'Opus','Haiku 4.5':'Haiku','GPT 5.4 Pro':'GPT','GPT-5 Nano':'GPT','Gemini 3.1 Pro':'Gemini','Gemini FL':'Gemini'};
+  const pairGaps = {'safety_vs_helpfulness':'3','ethics_vs_helpfulness':'2','safety_vs_compliance':'2','ethics_vs_compliance':'1','safety_vs_ethics':'1','compliance_vs_helpfulness':'1'};
+  const gapColors = {'3':'#5ab88a','2':'#d4a84a','1':'#d4735a'};
+  const modelFamilies = {'Sonnet 4.6':'Anthropic','Sonnet 4.5':'Anthropic','Opus 4.6':'Anthropic','Opus 4.5':'Anthropic','Opus 4':'Anthropic','Haiku 4.5':'Anthropic','GPT 5.4 Pro':'OpenAI','GPT-5 Nano':'OpenAI','Gemini 3.1 Pro':'Google','Gemini FL':'Google'};
   const sizes = {'Sonnet 4.6':'M','Sonnet 4.5':'M','Opus 4.6':'L','Opus 4.5':'L','Opus 4':'L','Haiku 4.5':'S','GPT 5.4 Pro':'L','GPT-5 Nano':'S','Gemini 3.1 Pro':'L','Gemini FL':'S'};
-  const familyColors = {'Sonnet':'#c97b2a','Opus':'#5a8ad4','Haiku':'#5ab88a','GPT':'#7a6ad4','Gemini':'#d4735a'};
+  const familyColors = {'Anthropic':'#5a8ad4','OpenAI':'#7a6ad4','Google':'#d4735a'};
 
   // Compute per-model per-pair D1 averages from heatmap data
   const modelScores = {};
@@ -1267,10 +1269,13 @@ function renderModelLeaderboard() {
   // Sort by composite desc
   const sorted = [...MODEL_ORDER].sort((a,b) => (modelScores[b]._composite || 0) - (modelScores[a]._composite || 0));
 
-  const headerCells = pairs.map(p => `<th style="font-size:11px;font-weight:700;color:#666;padding:6px 4px;text-align:center;white-space:nowrap">${pairLabels[p]}</th>`).join('');
+  const headerCells = pairs.map(p => {
+    const g = pairGaps[p];
+    return `<th style="font-size:11px;font-weight:700;color:#666;padding:6px 4px;text-align:center;white-space:nowrap">${pairLabels[p]}<br><span style="background:${gapColors[g]};color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700">${g}-gap</span></th>`;
+  }).join('');
 
   const rows = sorted.map((m, i) => {
-    const fam = families[m];
+    const fam = modelFamilies[m];
     const sz = sizes[m];
     const comp = modelScores[m]._composite;
     const cells = pairs.map(p => {
@@ -1285,8 +1290,8 @@ function renderModelLeaderboard() {
         <span style="background:${familyColors[fam]};color:#fff;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;margin-left:4px">${fam}</span>
         <span style="background:var(--bg);padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;color:var(--text2);margin-left:2px">${sz}</span>
       </td>
-      ${cells}
       <td style="padding:6px 8px;text-align:center;border-radius:4px;font-size:14px;font-weight:700;background:${scoreColor(comp)};color:${textColorForBg(comp)}">${comp.toFixed(2)}</td>
+      ${cells}
     </tr>`;
   }).join('');
 
@@ -1298,8 +1303,8 @@ function renderModelLeaderboard() {
         <thead>
           <tr>
             <th style="text-align:left;padding:6px 8px;font-size:12px;font-weight:700;color:#666">Model</th>
-            ${headerCells}
             <th style="font-size:12px;font-weight:700;color:#666;padding:6px 4px;text-align:center">Avg D1</th>
+            ${headerCells}
           </tr>
         </thead>
         <tbody>${rows}</tbody>
