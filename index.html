@@ -1088,32 +1088,32 @@ function renderKeyFindings() {
       <div style="background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid #d4735a">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Hardest Conflict</div>
         <div style="font-size:26px;font-weight:700;color:#d4735a;margin:4px 0">3.70 <span style="font-size:11px;font-weight:600;color:#999">/ 5.00</span></div>
-        <div style="font-size:10px;color:#aaa;margin-bottom:4px">avg score across all models &amp; judges</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;line-height:1.4;font-style:italic">Composite = mean(D1, D2, D3) for Compliance vs Helpfulness, averaged across all 10 models \u00d7 4 judges \u00d7 3 pressure tiers</div>
         <div style="font-size:13px;color:var(--text2)">Compliance vs Helpfulness is the hardest pair by far \u2014 models treat compliance as negotiable when users want help</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid #5ab88a">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">False Confidence</div>
         <div style="font-size:26px;font-weight:700;color:#5ab88a;margin:4px 0">0.5%</div>
-        <div style="font-size:10px;color:#aaa;margin-bottom:4px">31 of 6,000 responses (D1\u22654 but D2\u22642)</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;line-height:1.4;font-style:italic">Count where D1 \u2265 4 (correct priority) AND D2 \u2264 2 (poor reasoning) across all 6,000 observations = 31 responses (31/6000 = 0.5%)</div>
         <div style="font-size:13px;color:var(--text2)">Models almost never get the right answer for the wrong reason \u2014 when reasoning fails, the output fails too</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid #d4a84a">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Same-Family Bias</div>
         <div style="font-size:26px;font-weight:700;color:#d4a84a;margin:4px 0">+0.37</div>
-        <div style="font-size:10px;color:#aaa;margin-bottom:4px">OLS regression coefficient (\u03b2) on 1\u20135 scale</div>
-        <div style="font-size:13px;color:var(--text2)">Same-family judges inflate D1 scores by 0.37 points (p&lt;0.001). Self-evaluation is unreliable</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;line-height:1.4;font-style:italic">OLS: D1 ~ same_family + controls. \u03b2 = +0.37 means when judge and model share a family (e.g. both Anthropic), D1 scores are 0.37 points higher on the 1\u20135 scale (p&lt;0.001)</div>
+        <div style="font-size:13px;color:var(--text2)">Same-family judges inflate D1 scores by 0.37 points. Self-evaluation is unreliable</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid #7a6ad4">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Larger \u2260 Better</div>
         <div style="font-size:26px;font-weight:700;color:#7a6ad4;margin:4px 0">+0.55</div>
-        <div style="font-size:10px;color:#aaa;margin-bottom:4px">medium vs small regression coefficient (\u03b2)</div>
-        <div style="font-size:13px;color:var(--text2)">Medium models outperform big ones on D1 (p&lt;0.001). Model family and training methodology matter more than size</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;line-height:1.4;font-style:italic">OLS: D1 ~ size_category + controls. Medium vs Small \u03b2 = +0.55 (p&lt;0.001), but Large vs Small \u03b2 is not significant \u2014 medium-sized models outperform both large and small</div>
+        <div style="font-size:13px;color:var(--text2)">Medium models outperform big ones on D1. Model family and training methodology matter more than size</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:16px;border-left:4px solid #5a8ad4">
         <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px">Critical Vulnerability</div>
         <div style="font-size:26px;font-weight:700;color:#5a8ad4;margin:4px 0">Adjacent</div>
-        <div style="font-size:10px;color:#aaa;margin-bottom:4px">tier conflicts (1-gap pairs)</div>
-        <div style="font-size:13px;color:var(--text2)">Models show a threshold, not a gradient: big jump at 3-gap (+0.45), marginal at 2-gap (+0.16). Adjacent-tier conflicts are where they break</div>
+        <div style="font-size:11px;color:#999;margin-bottom:6px;line-height:1.4;font-style:italic">OLS: D1 ~ gap_size. 3-gap \u03b2 = +0.45 (p&lt;0.001), 2-gap \u03b2 = +0.16 (marginal). 1-gap pairs (adjacent tiers) are the baseline \u2014 models struggle most when the hierarchy distance is smallest</div>
+        <div style="font-size:13px;color:var(--text2)">Models show a threshold, not a gradient: big jump at 3-gap, marginal at 2-gap. Adjacent-tier conflicts are where they break</div>
       </div>
     </div>
   </div>`;
