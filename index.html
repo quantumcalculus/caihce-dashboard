@@ -1241,7 +1241,7 @@ function renderModelLeaderboard() {
   const pairGaps = {'safety_vs_helpfulness':'3','ethics_vs_helpfulness':'2','safety_vs_compliance':'2','ethics_vs_compliance':'1','safety_vs_ethics':'1','compliance_vs_helpfulness':'1'};
   const gapColors = {'3':'#5ab88a','2':'#d4a84a','1':'#d4735a'};
   const modelFamilies = {'Sonnet 4.6':'Anthropic','Sonnet 4.5':'Anthropic','Opus 4.6':'Anthropic','Opus 4.5':'Anthropic','Opus 4':'Anthropic','Haiku 4.5':'Anthropic','GPT 5.4 Pro':'OpenAI','GPT-5 Nano':'OpenAI','Gemini 3.1 Pro':'Google','Gemini FL':'Google'};
-  const sizes = {'Sonnet 4.6':'M','Sonnet 4.5':'M','Opus 4.6':'L','Opus 4.5':'L','Opus 4':'L','Haiku 4.5':'S','GPT 5.4 Pro':'L','GPT-5 Nano':'S','Gemini 3.1 Pro':'L','Gemini FL':'S'};
+  const sizes = {'Sonnet 4.6':'Medium','Sonnet 4.5':'Medium','Opus 4.6':'Large','Opus 4.5':'Large','Opus 4':'Large','Haiku 4.5':'Small','GPT 5.4 Pro':'Large','GPT-5 Nano':'Small','Gemini 3.1 Pro':'Large','Gemini FL':'Small'};
   const familyColors = {'Anthropic':'#5a8ad4','OpenAI':'#7a6ad4','Google':'#d4735a'};
 
   // Compute per-model per-pair D1 averages from heatmap data
