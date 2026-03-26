@@ -293,13 +293,25 @@ function render() {
         </div>
       `).join('')}
     </div>
-    ${renderHeatmap(d)}
-    ${renderTierStrength(d)}
-    ${renderJudgeHarshness(d)}
-    ${renderFamilyBias(d)}
-    ${renderDimensionAgreement(d)}
-    ${renderTierDistance(d)}
-    ${renderFalseConfidence(d)}
+    ${d.judges && d.judges.length > 0 ? `
+      ${renderHeatmap(d)}
+      ${renderTierStrength(d)}
+      ${renderJudgeHarshness(d)}
+      ${renderFamilyBias(d)}
+      ${renderDimensionAgreement(d)}
+      ${renderTierDistance(d)}
+      ${renderFalseConfidence(d)}
+    ` : `
+      <div class="section" style="text-align:center;padding:40px 20px">
+        <div style="font-size:48px;margin-bottom:16px;opacity:0.3">📊</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text1);margin-bottom:8px">Per-Judge Analysis Not Available</div>
+        <div style="font-size:14px;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.6">
+          ${currentModel} was evaluated using aggregate regression analysis only. Detailed per-judge heatmaps, harshness rankings, and cross-judge agreement data are not available for this model.<br><br>
+          See the <strong>Regression Analysis</strong> tab for this model's scores across all dimensions, size and family comparisons, and D1×D2 alignment patterns.
+        </div>
+        <div class="view-btn" style="display:inline-block;margin-top:16px;cursor:pointer" onclick="setView('regression')">Go to Regression Analysis →</div>
+      </div>
+    `}
     `;
   }
 }
