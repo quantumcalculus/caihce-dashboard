@@ -318,6 +318,7 @@ function judgeToggles(section, judges, includeAll=true) {
 
 // ===================== Q1: SCORE HEATMAP =====================
 function renderHeatmap(d) {
+  if (!d.judges || d.judges.length === 0) return '<div class="section"><div class="section-title">Heatmap</div><div style="padding:16px;color:var(--text2);font-size:13px">Detailed heatmap data not available for this model. See the Regression Analysis tab for aggregate statistics.</div></div>';
   const sec = 'heatmap';
   const judge = judgeStates[currentModel][sec];
   const judges = d.judges;
@@ -478,6 +479,7 @@ function renderTierStrength(d) {
 // ===================== Q2: JUDGE HARSHNESS =====================
 function renderJudgeHarshness(d) {
   const jh = d.judge_harshness;
+  if (!jh || Object.keys(jh).length === 0) return '';
   const judges = Object.keys(jh);
 
   let harshest = judges[0], most_lenient = judges[0];
@@ -611,6 +613,7 @@ function renderFamilyBias(d) {
 // ===================== Q4: DIMENSION AGREEMENT =====================
 function renderDimensionAgreement(d) {
   const da = d.dimension_agreement;
+  if (!da) return '';
   const dims = [
     {key:'D1', label:'D1 — Priority', mean: da.D1_mean_std, median: da.D1_median_std},
     {key:'D2', label:'D2 — Reasoning', mean: da.D2_mean_std, median: da.D2_median_std},
@@ -663,6 +666,7 @@ function renderDimensionAgreement(d) {
 
 // ===================== Q5: TIER DISTANCE VS COMPLIANCE =====================
 function renderTierDistance(d) {
+  if (!d.tier_distance) return '';
   const sec = 'distance';
   const judge = judgeStates[currentModel][sec];
   const judges = d.judges;
@@ -780,6 +784,7 @@ function renderTierDistance(d) {
 
 // ===================== Q6: FALSE CONFIDENCE =====================
 function renderFalseConfidence(d) {
+  if (!d.false_confidence || Object.keys(d.false_confidence).length === 0) return '';
   const sec = 'falseconf';
   const judge = judgeStates[currentModel][sec];
   const judges = d.judges;
@@ -1390,11 +1395,11 @@ function renderRegQ3() {
     <div class="section-title">Q3: Do Judges Favor Their Own Model Family?</div>
     <div class="section-sub">When Opus judges Opus, or Sonnet judges Sonnet — do they give inflated scores?</div>
     ${methodBox('How we measured this', [
-      'We created a yes/no variable: "is this judge from the same model family as the target?" Families are Opus (4, 4.5, 4.6) and Sonnet (4.5, 4.6). GPT and Gemini models are NOT considered same-family with each other.',
+      'We created a yes/no variable: "is this judge from the same model family as the target?" Families are Opus (4, 4.1, 4.5, 4.6), Sonnet (3.5, 3.7, 4, 4.5, 4.6), and Haiku (3, 3.5, 4.5). GPT and Gemini models are NOT considered same-family with each other.',
       'This variable is included alongside all other controls (judge identity, pressure, tier distance), so the coefficient captures <em>pure family bias</em> — the extra score bump that only appears when a judge evaluates its own family.',
       {cls:'m-highlight', html:`<div class="m-label">What the numbers mean</div>The coefficient shows how many extra points a same-family judge gives, on average, compared to a cross-family judge scoring the identical response under identical conditions.`}
     ,
-      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">TierIdentity</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03B2\u2084 <span class="eq-var">SameFamily</span><sub><i>i,j</i></sub></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 1 (Main Effects) · SameFamily = 1 when judge and target share a model line</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (cross-family baseline score under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span> = controls for pressure, tier distance, and tier identity<br><span>\u03B3<sub>j</sub></span> = judge fixed effects (controls for harshness differences)<br><strong><span>\u03B2\u2084</span> = the average score inflation when the judge evaluates a model from its own family (coefficient of interest)</strong><br>Families: Opus (4, 4.5, 4.6) and Sonnet (4.5, 4.6) · GPT and Gemini are not considered same-family</div>',
+      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">TierIdentity</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03B2\u2084 <span class="eq-var">SameFamily</span><sub><i>i,j</i></sub></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 1 (Main Effects) · SameFamily = 1 when judge and target share a model line</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (cross-family baseline score under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span> = controls for pressure, tier distance, and tier identity<br><span>\u03B3<sub>j</sub></span> = judge fixed effects (controls for harshness differences)<br><strong><span>\u03B2\u2084</span> = the average score inflation when the judge evaluates a model from its own family (coefficient of interest)</strong><br>Families: Opus (4, 4.1, 4.5, 4.6), Sonnet (3.5, 3.7, 4, 4.5, 4.6), Haiku (3, 3.5, 4.5) · GPT and Gemini are not considered same-family</div>',
     ])}
     ${mQ3()}
     <div class="stat-row">
@@ -1477,10 +1482,10 @@ function renderRegQ4() {
     <div class="section-title">Q4: Do Bigger Models Comply Better?</div>
     <div class="section-sub">Does model size (flagship vs mid-tier vs small) predict how well it resolves constitutional conflicts?</div>
     ${methodBox('How we measured this', [
-      'We grouped the 10 models into three size tiers: <strong>Big</strong> (Opus 4/4.5/4.6, GPT 5.4 Pro, Gemini 3.1 Pro), <strong>Medium</strong> (Sonnet 4.5/4.6), and <strong>Small</strong> (Haiku 4.5, GPT-5 Nano, Gemini FL).',
+      'We grouped the 16 models into three size tiers: <strong>Big</strong> (Opus 4/4.1/4.5/4.6, GPT 5.4 Pro, Gemini 3.1 Pro), <strong>Medium</strong> (Sonnet 3.5/3.7/4/4.5/4.6), and <strong>Small</strong> (Haiku 3/3.5/4.5, GPT-5 Nano, Gemini FL).',
       'Each size tier gets a variable in the regression. Small is the reference (baseline). The coefficient shows how much better (or worse) big/medium models score compared to small models, after controlling for everything else.',
     ,
-      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">SameFamily</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03B4\u2081 <span class="eq-var">Size_big</span> + \u03B4\u2082 <span class="eq-var">Size_medium</span></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 2 (Size Effects) · OLS with scenario-clustered SEs</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (expected score for a small model under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span>, <span>\u03B3<sub>j</sub></span> = controls for pressure, distance, family bias, and judge effects<br><strong><span>\u03B4\u2081</span> = how much better (or worse) big models score vs small models</strong><br><strong><span>\u03B4\u2082</span> = how much better (or worse) medium models score vs small models</strong><br>Big: Opus 4/4.5/4.6, GPT 5.4 Pro, Gemini 3.1 Pro · Medium: Sonnet 4.5/4.6 · Small (ref): Haiku 4.5, GPT-5 Nano, Gemini FL</div>',
+      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">SameFamily</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03B4\u2081 <span class="eq-var">Size_big</span> + \u03B4\u2082 <span class="eq-var">Size_medium</span></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 2 (Size Effects) · OLS with scenario-clustered SEs</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (expected score for a small model under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span>, <span>\u03B3<sub>j</sub></span> = controls for pressure, distance, family bias, and judge effects<br><strong><span>\u03B4\u2081</span> = how much better (or worse) big models score vs small models</strong><br><strong><span>\u03B4\u2082</span> = how much better (or worse) medium models score vs small models</strong><br>Big: Opus 4/4.1/4.5/4.6, GPT 5.4 Pro, Gemini 3.1 Pro · Medium: Sonnet 3.5/3.7/4/4.5/4.6 · Small (ref): Haiku 3/3.5/4.5, GPT-5 Nano, Gemini FL</div>',
     ])}
     ${mQ4()}
     <div class="stat-row">
@@ -1527,7 +1532,7 @@ function renderRegQ5() {
       'Each model family gets its own variable. The reference is <strong>Opus</strong> (the Anthropic flagship line). Positive coefficient = this family scores higher than Opus; negative = lower.',
       'This controls for judge effects, pressure, tier distance, and same-family bias — so the coefficient captures pure family-level performance differences.',
     ,
-      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">SameFamily</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03A3 \u03B4<sub><i>f</i></sub> <span class="eq-var">Family</span><sub><i>f</i></sub></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 3 (Family Effects) · OLS with scenario-clustered SEs · <i>f</i> = model family</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (expected score for the Opus family under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span>, <span>\u03B3<sub>j</sub></span> = controls for pressure, distance, family bias, and judge effects<br><strong><span>\u03B4<sub>f</sub></span> = how much better (or worse) each model family scores compared to Opus (coefficients of interest)</strong><br>Families: Haiku, Sonnet, GPT Nano, GPT Pro, Gemini FL, Gemini Pro · Reference: Opus</div>',
+      '<div class="equation"><span class="eq-dv">' + regDim + '</span><sub><i>i,j</i></sub> = \u03B1 + \u03B2\u2081 <span class="eq-var">Pressure</span> + \u03B2\u2082 <span class="eq-var">Distance</span> + \u03B2\u2083 <span class="eq-var">SameFamily</span> + \u03A3 \u03B3<sub><i>j</i></sub> <span class="eq-var">Judge</span><sub><i>j</i></sub> + <strong>\u03A3 \u03B4<sub><i>f</i></sub> <span class="eq-var">Family</span><sub><i>f</i></sub></strong> + \u03B5<sub><i>i,j</i></sub><br><span class="eq-ref">Model 3 (Family Effects) · OLS with scenario-clustered SEs · <i>f</i> = model family</span></div><div class="eq-legend"><strong>Parameters:</strong><br><span>\u03B1</span> = intercept (expected score for the Sonnet family under all reference conditions)<br><span>\u03B2\u2081\u2013\u03B2\u2083</span>, <span>\u03B3<sub>j</sub></span> = controls for pressure, distance, family bias, and judge effects<br><strong><span>\u03B4<sub>f</sub></span> = how much better (or worse) each model family scores compared to Opus (coefficients of interest)</strong><br>Families: Haiku, Sonnet, GPT Nano, GPT Pro, Gemini FL, Gemini Pro · Reference: Opus</div>',
     ])}
     ${mQ5()}
     <div style="font-size:14px;font-weight:600;margin-bottom:8px;">Family performance relative to Opus (${dim})</div>
@@ -1554,7 +1559,7 @@ function renderRegQ5() {
 // ---- Q6 ----
 function renderRegQ6() {
   const r = REG.q6.results;
-  const byModel = Object.entries(r.by_model).sort((a,b) => b[1].aligned_success - a[1].aligned_success);
+  const byModel = Object.entries(r.by_model).sort((a,b) => b[1]['Aligned Success'] - a[1]['Aligned Success']);
   return `<div class="section">
     <div class="section-title">Q6: Do Models Get the Right Answer for the Wrong Reason?</div>
     <div class="section-sub">Comparing priority resolution (D1) against reasoning quality (D2) to find "false confidence" and "eloquent failure" patterns.</div>
@@ -1573,8 +1578,8 @@ function renderRegQ6() {
     <div style="margin-top:16px;font-size:14px;font-weight:600;margin-bottom:8px;">Aligned Success rate by model</div>
     ${pmStacked(PM.q6)}
     ${findingBox([
-      '<strong>False confidence is extremely rare (0.5%)</strong> — models almost never get the right answer for the wrong reason. Similarly, eloquent failure (0.2%) is nearly nonexistent.',
-      'The dominant failure mode is <strong>Aligned Failure (15.7%)</strong> — when models fail, everything fails together. D1 and D2 are correlated at r=0.897, meaning priority identification and reasoning quality are tightly coupled.',
+      '<strong>False confidence is rare but non-trivial (2.7%)</strong> — older models (Haiku 3.5: 18%, Sonnet 3.5: 10%) drive most cases. Eloquent failure (0.2%) is nearly nonexistent.',
+      'The dominant failure mode is <strong>Aligned Failure (18.0%)</strong> — when models fail, everything fails together. D1 and D2 are correlated at r=0.866, meaning priority identification and reasoning quality are tightly coupled.',
       'This is actually <strong>reassuring for constitutional AI safety</strong>: there\u0027s no hidden failure mode where a model systematically gives correct outputs while having no understanding of why. When the reasoning breaks, the output breaks too — making failures detectable rather than silent.'
     ])}
   </div>`;
